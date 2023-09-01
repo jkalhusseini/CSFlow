@@ -8,17 +8,50 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 from sklearn.decomposition import PCA
+import time
+
+
+
+
 
 
 st.title("CSFlow Computation")
 
+st.subheader("Data Cleaning:")
 uploaded_file = st.file_uploader("Insert CSV File Here!")
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+st.caption("After uploading your CSV, ensure the columns are labeled appropriately below.")
+st.caption("Flow rate = FR, Age @ enrollment = Age, Months since shunt = Months, FOHR = FOHR, and Etiology labeled as either NTD, OTHER, or IVH")
+
+df = pd.read_csv(uploaded_file)
+
+st.dataframe(df)
+
+
+if st.button("Process Data"):
+    with st.spinner('Wait for it...'):
+        time.sleep(1)
+    st.success('Done!')
+
+
+
+
+    
+     #Histogram
+    hist_values = px.histogram(
+        df, x = "FR", nbins = 100,
+        title = "Histogram of Flow Rate Distributions",
+        color = "Etiology",
+        #text_auto = True,
+        #y_title = "Count",
+        #x_title = "Flow Rate",
+        )
+    
+    st.plotly_chart(hist_values)
+    
 
     SubPlot = make_subplots(rows = 1, cols = 4,
     y_title= "Flow Rate", x_title="", subplot_titles= ("Age", "BMI", "Months", "FOHR")   
-                     )
+                    )
 
     SubPlot.update_layout(showlegend = False, title = "", plot_bgcolor = 'white')
 
@@ -36,7 +69,7 @@ if uploaded_file is not None:
 
 
 
-
+   
     Plot3D = px.scatter_3d(df, x = "FOHR", y = "Age", z = "FR", color = "Etiology")
     Plot3D.update_traces(marker_size = 5, opacity = 0.75)
 
@@ -53,17 +86,16 @@ if uploaded_file is not None:
     }
 
     fig = px.scatter_matrix(
-     components,
-     labels=labels,
-     dimensions=range(5),
+    components,
+    labels=labels,
+    dimensions=range(5),
         color=df["Etiology"]
     )
     fig.update_traces(diagonal_visible=False, showupperhalf = False )
     fig.update_traces(marker_size = 4.5
-                  )
+                )
     
     st.plotly_chart(fig)
 
-else: st.warning("Bro where's the file???")
 
 
