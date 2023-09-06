@@ -97,7 +97,7 @@ if st.button("Process Data"):
         rows=1, cols=2,
         specs=[[{'type': 'surface'}, {'type': 'surface'}]])
     fig.add_trace(
-    go.Surface(x=df['FOHR'], y=df["Age"], z=df["FR"], colorscale='Viridis', showscale=False),
+    px.surface(x=df['FOHR'], y=df["Age"], z=df["FR"], colorscale='Viridis', showscale=False),
     row=1, col=1)
 
     fig.add_trace(
