@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 from PIL import Image
 
 # Change the theme to "dark"
-st.set_theme("light")
+#st.theme("light")
 
 # Enable wide mode to occupy the whole width of the page
 st.set_page_config(layout="wide")
@@ -69,19 +69,33 @@ if uploaded_file is not None:
 
         # Histograms using Seaborn
         st.subheader("Histograms:")
-        for column in selected_columns:
-            if df[column].dtype == 'float64' or df[column].dtype == 'int64':
-                hist_fig, ax = plt.subplots()
-                sns.histplot(data=df, x=column, ax=ax)
-                st.pyplot(hist_fig)
+        num_cols = len(selected_columns)
+        num_cols_per_row = 3  # Number of histograms per row
+        num_rows = num_cols // num_cols_per_row + (num_cols % num_cols_per_row > 0)
+
+        for i in range(num_rows):
+            cols_in_this_row = selected_columns[i * num_cols_per_row: (i + 1) * num_cols_per_row]
+            row = st.columns(num_cols_per_row)
+            for j, col in enumerate(cols_in_this_row):
+                if df[col].dtype == 'float64' or df[col].dtype == 'int64':
+                    hist_fig, ax = plt.subplots()
+                    sns.histplot(data=df, x=col, ax=ax)
+                    row[j].pyplot(hist_fig)
 
         # Box plots using Seaborn
         st.subheader("Box Plots:")
-        for column in selected_columns:
-            if df[column].dtype == 'float64' or df[column].dtype == 'int64':
-                box_fig, ax = plt.subplots()
-                sns.boxplot(data=df, y=column, ax=ax)
-                st.pyplot(box_fig)
+        num_cols = len(selected_columns)
+        num_cols_per_row = 3  # Number of box plots per row
+        num_rows = num_cols // num_cols_per_row + (num_cols % num_cols_per_row > 0)
+
+        for i in range(num_rows):
+            cols_in_this_row = selected_columns[i * num_cols_per_row: (i + 1) * num_cols_per_row]
+            row = st.columns(num_cols_per_row)
+            for j, col in enumerate(cols_in_this_row):
+                if df[col].dtype == 'float64' or df[col].dtype == 'int64':
+                    box_fig, ax = plt.subplots()
+                    sns.boxplot(data=df, y=col, ax=ax)
+                    row[j].pyplot(box_fig)
 
         # Categorical Data Analysis using Seaborn
         st.subheader("Categorical Data Analysis:")
@@ -146,10 +160,24 @@ if uploaded_file is not None:
             x_surface = st.selectbox("Select X-axis for Surface Plot:", numeric_columns)
             y_surface = st.selectbox("Select Y-axis for Surface Plot:", numeric_columns)
             z_surface = st.selectbox("Select Z-axis for Surface Plot:", numeric_columns)
-            if len(set([x_surface, y_surface, z_surface])) == 3:
-                surface_fig = go.Figure(data=[go.Surface(z=df[z_surface], x=df[x_surface], y=df[y_surface])])
-                surface_fig.update_layout(scene=dict(zaxis_title=z_surface, xaxis_title=x_surface, yaxis_title=y_surface))
-                st.plotly_chart(surface_fig)
+    
+        if len(set([x_surface, y_surface, z_surface])) == 3:
+            surface_fig = go.Figure(data=[go.Surface(z=df[z_surface], x=df[x_surface], y=df[y_surface])])
+            surface_fig.update_layout(scene=dict(zaxis_title=z_surface, xaxis_title=x_surface, yaxis_title=y_surface))
+        
+        # Add scatter points to make the plot more informative
+        scatter_trace = go.Scatter3d(
+            x=df[x_surface],
+            y=df[y_surface],
+            z=df[z_surface],
+            mode='markers',
+            marker=dict(size=3, opacity=0.7, color='red'),
+            name='Data Points'
+        )
+        surface_fig.add_trace(scatter_trace)
+
+        st.plotly_chart(surface_fig)
+
 
         # Classification Algorithm Selection
         st.subheader("Classification Analysis:")
